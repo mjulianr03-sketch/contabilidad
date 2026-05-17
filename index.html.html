@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Mi Contabilidad"/>
+<title>Mi Contabilidad · Electricista</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #F5F4F0;
+    --surface: #FFFFFF;
+    --surface2: #EEEDE8;
+    --text: #1A1A18;
+    --text2: #6B6B66;
+    --text3: #9B9B96;
+    --green: #1D6B4A;
+    --green-bg: #E6F4ED;
+    --red: #B03A2E;
+    --red-bg: #FAECEA;
+    --amber: #8A5C0A;
+    --amber-bg: #FDF3E0;
+    --blue: #1A4F8A;
+    --blue-bg: #E8F0FA;
+    --border: rgba(0,0,0,0.08);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --tab-h: 56px;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--surface);
+    padding: 56px 20px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .header-title { font-size: 22px; font-weight: 600; letter-spacing: -0.3px; }
+  .header-sub { font-size: 13px; color: var(--text2); margin-top: 2px; }
+
+  /* CONTENT */
+  .content {
+    padding: 16px 16px calc(var(--tab-h) + 16px + var(--safe-bottom));
+    max-width: 430px;
+    margin: 0 auto;
+  }
+
+  /* BOTTOM TABS */
+  .tabs {
+    position: fixed;
+    bottom: 0;
+    left: 0; right: 0;
+    height: calc(var(--tab-h) + var(--safe-bottom));
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    padding-top: 8px;
+    z-index: 100;
+  }
+  .tab-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 0;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .tab-icon {
+    width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 8px;
+    transition: background 0.15s;
+  }
+  .tab-btn svg { width: 20px; height: 20px; stroke: var(--text3); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: stroke 0.15s; }
+  .tab-label { font-size: 10px; color: var(--text3); transition: color 0.15s; }
+  .tab-btn.active svg { stroke: var(--text); }
+  .tab-btn.active .tab-label { color: var(--text); font-weight: 500; }
+  .tab-btn.active .tab-icon { background: var(--surface2); }
+
+  /* SECTIONS */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+  }
+  .card-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 14px;
+  }
+
+  /* METRICS */
+  .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .metric { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 12px; }
+  .metric-label { font-size: 11px; color: var(--text2); margin-bottom: 6px; }
+  .metric-value { font-size: 17px; font-weight: 600; font-family: 'DM Mono', monospace; color: var(--text); }
+  .metric-value.green { color: var(--green); }
+  .metric-value.red { color: var(--red); }
+  .metric-value.amber { color: var(--amber); }
+
+  /* FORM */
+  .form-group { margin-bottom: 12px; }
+  .form-group label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px; font-weight: 500; }
+  .form-group input, .form-group select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 11px 13px;
+    font-size: 15px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    outline: none;
+    -webkit-appearance: none;
+  }
+  .form-group input:focus, .form-group select:focus { border-color: rgba(0,0,0,0.3); background: #fff; }
+  .form-group select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B6B66' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 13px center; padding-right: 36px; }
+
+  /* PREVIEW BOX */
+  .preview-box {
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+  }
+  .preview-row { display: flex; justify-content: space-between; font-size: 13px; padding: 3px 0; }
+  .preview-row span:first-child { color: var(--text2); }
+  .preview-row span:last-child { font-weight: 500; font-family: 'DM Mono', monospace; }
+  .preview-divider { height: 1px; background: var(--border); margin: 6px 0; }
+  .preview-total { font-weight: 600; font-size: 14px; }
+
+  /* BUTTON */
+  .btn-main {
+    width: 100%;
+    background: var(--text);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    letter-spacing: -0.2px;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .btn-main:active { opacity: 0.85; transform: scale(0.99); }
+
+  /* CHECKBOX */
+  .check-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .check-row input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--text); cursor: pointer; }
+  .check-row label { font-size: 14px; color: var(--text); cursor: pointer; }
+
+  /* LIST ITEMS */
+  .list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .list-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .li-main { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
+  .li-sub { font-size: 11px; color: var(--text2); line-height: 1.5; }
+  .li-right { text-align: right; flex-shrink: 0; margin-left: 12px; }
+  .li-amount { font-size: 14px; font-weight: 600; font-family: 'DM Mono', monospace; margin-bottom: 4px; }
+  .del-btn { font-size: 11px; color: var(--text3); cursor: pointer; }
+  .del-btn:active { color: var(--red); }
+
+  /* BADGES */
+  .badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; margin-left: 5px; vertical-align: middle; }
+  .badge-blue { background: var(--blue-bg); color: var(--blue); }
+  .badge-green { background: var(--green-bg); color: var(--green); }
+  .badge-red { background: var(--red-bg); color: var(--red); }
+
+  /* IMP ROWS */
+  .imp-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; font-size: 13px; }
+  .imp-lbl { color: var(--text2); }
+  .imp-val { font-weight: 600; font-family: 'DM Mono', monospace; font-size: 13px; }
+  .imp-divider { height: 1px; background: var(--border); margin: 6px 0; }
+  .imp-total-lbl { font-weight: 600; color: var(--text); font-size: 14px; }
+  .imp-total-val { font-size: 17px; font-weight: 700; font-family: 'DM Mono', monospace; }
+
+  /* TRIM SELECTOR */
+  .trim-sel { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+  .trim-btn { padding: 7px 14px; font-size: 13px; font-weight: 500; border: 1px solid var(--border); background: var(--surface); border-radius: 20px; cursor: pointer; color: var(--text2); font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+  .trim-btn.active { background: var(--text); color: #fff; border-color: var(--text); }
+
+  /* EMPTY */
+  .empty { text-align: center; color: var(--text3); font-size: 13px; padding: 24px 0; }
+
+  /* INFO BOX */
+  .info-box { background: var(--blue-bg); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 12px; color: var(--blue); line-height: 1.6; margin-top: 12px; }
+
+  /* INSTALL BANNER */
+  .install-banner {
+    background: var(--text);
+    color: #fff;
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+    display: none;
+  }
+  .install-banner strong { font-weight: 600; display: block; margin-bottom: 4px; font-size: 14px; }
+  .install-banner .close-banner { float: right; cursor: pointer; opacity: 0.6; font-size: 16px; margin-top: -2px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-title">Mi contabilidad</div>
+  <div class="header-sub">Electricista autónomo · España</div>
+</div>
+
+<div class="content">
+
+  <!-- INSTALAR BANNER -->
+  <div class="install-banner" id="install-banner">
+    <span class="close-banner" onclick="document.getElementById('install-banner').style.display='none'">✕</span>
+    <strong>Instalar en tu iPhone</strong>
+    Toca el botón compartir (cuadrado con flecha) y selecciona "Añadir a pantalla de inicio"
+  </div>
+
+  <!-- RESUMEN -->
+  <div id="sec-resumen" class="section active">
+    <div class="trim-sel" id="res-trims">
+      <button class="trim-btn active" onclick="setResT(1,this)">T1</button>
+      <button class="trim-btn" onclick="setResT(2,this)">T2</button>
+      <button class="trim-btn" onclick="setResT(3,this)">T3</button>
+      <button class="trim-btn" onclick="setResT(4,this)">T4</button>
+      <button class="trim-btn" onclick="setResT(0,this)">Anual</button>
+    </div>
+    <div class="metric-grid">
+      <div class="metric"><div class="metric-label">Ingresos (base)</div><div class="metric-value green" id="r-ing">0,00 €</div></div>
+      <div class="metric"><div class="metric-label">IVA cobrado</div><div class="metric-value amber" id="r-iva">0,00 €</div></div>
+      <div class="metric"><div class="metric-label">Gastos totales</div><div class="metric-value red" id="r-eg">0,00 €</div></div>
+      <div class="metric"><div class="metric-label">Beneficio neto</div><div class="metric-value" id="r-ben">0,00 €</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Últimos movimientos</div>
+      <div id="r-lista"><div class="empty">Sin movimientos aún</div></div>
+    </div>
+  </div>
+
+  <!-- INGRESOS -->
+  <div id="sec-ingresos" class="section">
+    <div class="card">
+      <div class="card-title">Nuevo ingreso</div>
+      <div class="form-group"><label>Descripción del trabajo</label><input type="text" id="i-desc" placeholder="Ej: Instalación cuadro eléctrico"/></div>
+      <div class="form-group"><label>Base imponible (sin IVA) €</label><input type="number" id="i-base" placeholder="0.00" inputmode="decimal" min="0" step="0.01"/></div>
+      <div class="form-group"><label>IVA aplicado</label>
+        <select id="i-iva">
+          <option value="21">21% — general</option>
+          <option value="10">10% — reducido</option>
+          <option value="0">0% — exento</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Retención IRPF</label>
+        <select id="i-irpf">
+          <option value="0">0% — particular (sin retención)</option>
+          <option value="7">7% — empresa (primer año)</option>
+          <option value="15">15% — empresa (general)</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Trimestre</label>
+        <select id="i-trim"><option value="1">T1 (ene–mar)</option><option value="2">T2 (abr–jun)</option><option value="3">T3 (jul–sep)</option><option value="4">T4 (oct–dic)</option></select>
+      </div>
+      <div class="preview-box">
+        <div class="preview-row"><span>Base imponible</span><span id="p-base">0,00 €</span></div>
+        <div class="preview-row"><span>IVA repercutido</span><span id="p-iva" style="color:var(--amber)">0,00 €</span></div>
+        <div class="preview-row"><span>Retención IRPF</span><span id="p-ret" style="color:var(--red)">0,00 €</span></div>
+        <div class="preview-divider"></div>
+        <div class="preview-row preview-total"><span>Total a cobrar</span><span id="p-total" style="color:var(--green)">0,00 €</span></div>
+      </div>
+      <button class="btn-main" onclick="addIngreso()">Añadir ingreso</button>
+    </div>
+    <div class="card">
+      <div class="card-title">Historial</div>
+      <div id="i-lista"><div class="empty">Sin ingresos registrados</div></div>
+    </div>
+  </div>
+
+  <!-- EGRESOS -->
+  <div id="sec-egresos" class="section">
+    <div class="card">
+      <div class="card-title">Nuevo egreso</div>
+      <div class="form-group"><label>Descripción</label><input type="text" id="e-desc" placeholder="Ej: Cable y conectores Leroy Merlin"/></div>
+      <div class="form-group"><label>Importe total (con IVA) €</label><input type="number" id="e-imp" placeholder="0.00" inputmode="decimal" min="0" step="0.01"/></div>
+      <div class="form-group"><label>IVA incluido</label>
+        <select id="e-iva">
+          <option value="21">21% — general</option>
+          <option value="10">10% — reducido</option>
+          <option value="0">0% — sin IVA / no deducible</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Categoría</label>
+        <select id="e-cat">
+          <option value="materiales">Materiales eléctricos</option>
+          <option value="viaticos">Viáticos / Transporte</option>
+          <option value="herramientas">Herramientas y equipos</option>
+          <option value="formacion">Formación / Curso</option>
+          <option value="cuota">Cuota autónomo (RETA)</option>
+          <option value="telefono">Teléfono / Internet</option>
+          <option value="otros">Otros gastos</option>
+        </select>
+      </div>
+      <div class="check-row">
+        <input type="checkbox" id="e-ded" checked/>
+        <label for="e-ded">Gasto deducible en IRPF</label>
+      </div>
+      <div class="form-group"><label>Trimestre</label>
+        <select id="e-trim"><option value="1">T1 (ene–mar)</option><option value="2">T2 (abr–jun)</option><option value="3">T3 (jul–sep)</option><option value="4">T4 (oct–dic)</option></select>
+      </div>
+      <button class="btn-main" onclick="addEgreso()">Añadir egreso</button>
+    </div>
+    <div class="card">
+      <div class="card-title">Historial</div>
+      <div id="e-lista"><div class="empty">Sin egresos registrados</div></div>
+    </div>
+  </div>
+
+  <!-- IMPUESTOS -->
+  <div id="sec-impuestos" class="section">
+    <div class="trim-sel" id="imp-trims">
+      <button class="trim-btn active" onclick="setImpT(1,this)">T1</button>
+      <button class="trim-btn" onclick="setImpT(2,this)">T2</button>
+      <button class="trim-btn" onclick="setImpT(3,this)">T3</button>
+      <button class="trim-btn" onclick="setImpT(4,this)">T4</button>
+    </div>
+    <div class="card">
+      <div class="card-title">IVA — Modelo 303</div>
+      <div class="imp-row"><span class="imp-lbl">IVA repercutido (cobrado)</span><span class="imp-val amber" id="iva-rep">0,00 €</span></div>
+      <div class="imp-row"><span class="imp-lbl">IVA soportado (pagado en gastos)</span><span class="imp-val" id="iva-sop">0,00 €</span></div>
+      <div class="imp-divider"></div>
+      <div class="imp-row"><span class="imp-total-lbl">Resultado a ingresar</span><span class="imp-total-val" id="iva-res">0,00 €</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">IRPF — Modelo 130 (acumulado)</div>
+      <div class="imp-row"><span class="imp-lbl">Ingresos acumulados</span><span class="imp-val" id="irpf-ing">0,00 €</span></div>
+      <div class="imp-row"><span class="imp-lbl">Gastos deducibles acumulados</span><span class="imp-val" id="irpf-gas">0,00 €</span></div>
+      <div class="imp-row"><span class="imp-lbl">Rendimiento neto</span><span class="imp-val" id="irpf-net">0,00 €</span></div>
+      <div class="imp-row"><span class="imp-lbl">20% s/ rendimiento</span><span class="imp-val" id="irpf-20p">0,00 €</span></div>
+      <div class="imp-row"><span class="imp-lbl">Retenciones soportadas</span><span class="imp-val" id="irpf-ret">0,00 €</span></div>
+      <div class="imp-row"><span class="imp-lbl">Pagos anteriores</span><span class="imp-val" id="irpf-ant">0,00 €</span></div>
+      <div class="imp-divider"></div>
+      <div class="imp-row"><span class="imp-total-lbl">A ingresar este trimestre</span><span class="imp-total-val" id="irpf-res">0,00 €</span></div>
+    </div>
+    <div class="info-box">
+      <strong style="display:block;margin-bottom:4px;font-size:13px;">Plazos de presentación</strong>
+      T1 → 1–20 abril · T2 → 1–20 julio · T3 → 1–20 octubre · T4 → 1–20 enero
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM TABS -->
+<nav class="tabs">
+  <button class="tab-btn active" id="tab-resumen" onclick="showTab('resumen')">
+    <div class="tab-icon">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    </div>
+    <span class="tab-label">Resumen</span>
+  </button>
+  <button class="tab-btn" id="tab-ingresos" onclick="showTab('ingresos')">
+    <div class="tab-icon">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+    </div>
+    <span class="tab-label">Ingresos</span>
+  </button>
+  <button class="tab-btn" id="tab-egresos" onclick="showTab('egresos')">
+    <div class="tab-icon">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+    </div>
+    <span class="tab-label">Egresos</span>
+  </button>
+  <button class="tab-btn" id="tab-impuestos" onclick="showTab('impuestos')">
+    <div class="tab-icon">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    </div>
+    <span class="tab-label">Impuestos</span>
+  </button>
+</nav>
+
+<script>
+const KEY = 'contabilidad_v1';
+let data = { ingresos: [], egresos: [] };
+let resT = 1, impT = 1;
+const catL = { materiales:'Materiales', viaticos:'Viáticos', herramientas:'Herramientas', formacion:'Formación', cuota:'Cuota RETA', telefono:'Teléfono', otros:'Otros' };
+
+function save() { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch(e){} }
+function load() { try { const d = localStorage.getItem(KEY); if(d) data = JSON.parse(d); } catch(e){} }
+
+function fmt(n) { return Number(n).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €'; }
+
+function showTab(name) {
+  ['resumen','ingresos','egresos','impuestos'].forEach(t => {
+    document.getElementById('sec-'+t).classList.toggle('active', t===name);
+    document.getElementById('tab-'+t).classList.toggle('active', t===name);
+  });
+  if(name==='impuestos') renderImp();
+  if(name==='resumen') renderRes();
+}
+
+function setResT(t,el) { resT=t; document.querySelectorAll('#res-trims .trim-btn').forEach(b=>b.classList.remove('active')); el.classList.add('active'); renderRes(); }
+function setImpT(t,el) { impT=t; document.querySelectorAll('#imp-trims .trim-btn').forEach(b=>b.classList.remove('active')); el.classList.add('active'); renderImp(); }
+
+function updatePreview() {
+  const base = parseFloat(document.getElementById('i-base').value)||0;
+  const iva = parseInt(document.getElementById('i-iva').value)||0;
+  const irpf = parseInt(document.getElementById('i-irpf').value)||0;
+  const ivaAmt = base*iva/100;
+  const retAmt = base*irpf/100;
+  document.getElementById('p-base').textContent = fmt(base);
+  document.getElementById('p-iva').textContent = fmt(ivaAmt);
+  document.getElementById('p-ret').textContent = fmt(retAmt);
+  document.getElementById('p-total').textContent = fmt(base+ivaAmt-retAmt);
+}
+document.getElementById('i-base').addEventListener('input', updatePreview);
+document.getElementById('i-iva').addEventListener('change', updatePreview);
+document.getElementById('i-irpf').addEventListener('change', updatePreview);
+
+function addIngreso() {
+  const desc = document.getElementById('i-desc').value.trim();
+  const base = parseFloat(document.getElementById('i-base').value);
+  const iva = parseInt(document.getElementById('i-iva').value);
+  const irpf = parseInt(document.getElementById('i-irpf').value);
+  const trim = parseInt(document.getElementById('i-trim').value);
+  if(!desc||isNaN(base)||base<=0) { alert('Completa la descripción e importe.'); return; }
+  const ivaAmt = base*iva/100;
+  const retAmt = base*irpf/100;
+  data.ingresos.push({ id:Date.now(), desc, base, iva, ivaAmt, irpf, retAmt, total:base+ivaAmt-retAmt, trim });
+  save();
+  document.getElementById('i-desc').value = '';
+  document.getElementById('i-base').value = '';
+  updatePreview();
+  renderIngresos(); renderRes();
+}
+
+function addEgreso() {
+  const desc = document.getElementById('e-desc').value.trim();
+  const imp = parseFloat(document.getElementById('e-imp').value);
+  const ivaRate = parseInt(document.getElementById('e-iva').value);
+  const cat = document.getElementById('e-cat').value;
+  const deducible = document.getElementById('e-ded').checked;
+  const trim = parseInt(document.getElementById('e-trim').value);
+  if(!desc||isNaN(imp)||imp<=0) { alert('Completa la descripción e importe.'); return; }
+  const base = ivaRate>0 ? imp/(1+ivaRate/100) : imp;
+  const ivaAmt = imp-base;
+  data.egresos.push({ id:Date.now(), desc, imp, ivaRate, ivaAmt, base, cat, deducible, trim });
+  save();
+  document.getElementById('e-desc').value = '';
+  document.getElementById('e-imp').value = '';
+  renderEgresos(); renderRes();
+}
+
+function delI(id) { if(!confirm('¿Eliminar este ingreso?')) return; data.ingresos = data.ingresos.filter(x=>x.id!==id); save(); renderIngresos(); renderRes(); }
+function delE(id) { if(!confirm('¿Eliminar este egreso?')) return; data.egresos = data.egresos.filter(x=>x.id!==id); save(); renderEgresos(); renderRes(); }
+
+function renderIngresos() {
+  const el = document.getElementById('i-lista');
+  if(!data.ingresos.length) { el.innerHTML='<div class="empty">Sin ingresos registrados</div>'; return; }
+  el.innerHTML = [...data.ingresos].reverse().map(i=>`
+    <div class="list-item">
+      <div style="flex:1;min-width:0;">
+        <div class="li-main">${i.desc}</div>
+        <div class="li-sub">T${i.trim} · Base: ${fmt(i.base)} · IVA ${i.iva}%: ${fmt(i.ivaAmt)}<br>IRPF ${i.irpf}%: -${fmt(i.retAmt)}</div>
+      </div>
+      <div class="li-right">
+        <div class="li-amount" style="color:var(--green)">${fmt(i.total)}</div>
+        <div class="del-btn" onclick="delI(${i.id})">eliminar</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderEgresos() {
+  const el = document.getElementById('e-lista');
+  if(!data.egresos.length) { el.innerHTML='<div class="empty">Sin egresos registrados</div>'; return; }
+  el.innerHTML = [...data.egresos].reverse().map(e=>`
+    <div class="list-item">
+      <div style="flex:1;min-width:0;">
+        <div class="li-main">${e.desc}${e.deducible?'<span class="badge badge-blue">deducible</span>':''}</div>
+        <div class="li-sub">T${e.trim} · ${catL[e.cat]} · IVA ${e.ivaRate}%: ${fmt(e.ivaAmt)}<br>Base deducible: ${fmt(e.base)}</div>
+      </div>
+      <div class="li-right">
+        <div class="li-amount" style="color:var(--red)">-${fmt(e.imp)}</div>
+        <div class="del-btn" onclick="delE(${e.id})">eliminar</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderRes() {
+  const fi = resT===0 ? data.ingresos : data.ingresos.filter(x=>x.trim===resT);
+  const fe = resT===0 ? data.egresos : data.egresos.filter(x=>x.trim===resT);
+  const totalBase = fi.reduce((a,x)=>a+x.base,0);
+  const totalIva = fi.reduce((a,x)=>a+x.ivaAmt,0);
+  const totalEg = fe.reduce((a,x)=>a+x.imp,0);
+  const ben = totalBase - totalEg;
+  document.getElementById('r-ing').textContent = fmt(totalBase);
+  document.getElementById('r-iva').textContent = fmt(totalIva);
+  document.getElementById('r-eg').textContent = fmt(totalEg);
+  const bEl = document.getElementById('r-ben');
+  bEl.textContent = fmt(ben);
+  bEl.className = 'metric-value ' + (ben>=0?'green':'red');
+  const todos = [...fi.map(x=>({...x,tipo:'i'})),...fe.map(x=>({...x,tipo:'e'}))].sort((a,b)=>b.id-a.id).slice(0,6);
+  const lista = document.getElementById('r-lista');
+  if(!todos.length) { lista.innerHTML='<div class="empty">Sin movimientos aún</div>'; return; }
+  lista.innerHTML = todos.map(m=>m.tipo==='i'?`
+    <div class="list-item">
+      <div style="flex:1;min-width:0;"><div class="li-main">${m.desc}</div><div class="li-sub">T${m.trim} · IVA ${fmt(m.ivaAmt)}</div></div>
+      <div class="li-right"><div class="li-amount" style="color:var(--green)">+${fmt(m.base)}</div></div>
+    </div>`:
+    `<div class="list-item">
+      <div style="flex:1;min-width:0;"><div class="li-main">${m.desc}</div><div class="li-sub">T${m.trim} · ${catL[m.cat]}</div></div>
+      <div class="li-right"><div class="li-amount" style="color:var(--red)">-${fmt(m.imp)}</div></div>
+    </div>`).join('');
+}
+
+function renderImp() {
+  const t = impT;
+  const ingTrim = data.ingresos.filter(x=>x.trim===t);
+  const egTrim = data.egresos.filter(x=>x.trim===t);
+  const ivaRep = ingTrim.reduce((a,x)=>a+x.ivaAmt,0);
+  const ivaSop = egTrim.reduce((a,x)=>a+x.ivaAmt,0);
+  const ivaRes = Math.max(0, ivaRep-ivaSop);
+  document.getElementById('iva-rep').textContent = fmt(ivaRep);
+  document.getElementById('iva-sop').textContent = fmt(ivaSop);
+  const ivaEl = document.getElementById('iva-res');
+  ivaEl.textContent = fmt(ivaRes);
+  ivaEl.style.color = ivaRes>0 ? 'var(--red)' : 'var(--green)';
+
+  const ingAcum = data.ingresos.filter(x=>x.trim<=t).reduce((a,x)=>a+x.base,0);
+  const gasAcum = data.egresos.filter(x=>x.trim<=t&&x.deducible).reduce((a,x)=>a+x.base,0);
+  const neto = Math.max(0, ingAcum-gasAcum);
+  const irpf20 = neto*0.20;
+  const retAcum = data.ingresos.filter(x=>x.trim<=t).reduce((a,x)=>a+x.retAmt,0);
+  const ingPrev = data.ingresos.filter(x=>x.trim<t).reduce((a,x)=>a+x.base,0);
+  const gasPrev = data.egresos.filter(x=>x.trim<t&&x.deducible).reduce((a,x)=>a+x.base,0);
+  const retPrev = data.ingresos.filter(x=>x.trim<t).reduce((a,x)=>a+x.retAmt,0);
+  const netoPrev = Math.max(0,ingPrev-gasPrev);
+  const pagosAnt = Math.max(0, netoPrev*0.20 - retPrev);
+  const irpfRes = Math.max(0, irpf20 - retAcum - pagosAnt);
+
+  document.getElementById('irpf-ing').textContent = fmt(ingAcum);
+  document.getElementById('irpf-gas').textContent = fmt(gasAcum);
+  document.getElementById('irpf-net').textContent = fmt(neto);
+  document.getElementById('irpf-20p').textContent = fmt(irpf20);
+  document.getElementById('irpf-ret').textContent = fmt(retAcum);
+  document.getElementById('irpf-ant').textContent = fmt(pagosAnt);
+  const irpfEl = document.getElementById('irpf-res');
+  irpfEl.textContent = fmt(irpfRes);
+  irpfEl.style.color = irpfRes>0 ? 'var(--red)' : 'var(--green)';
+}
+
+// Mostrar banner de instalación si no está en modo standalone
+if (!window.navigator.standalone) {
+  setTimeout(()=>{ document.getElementById('install-banner').style.display='block'; }, 1500);
+}
+
+load();
+renderRes();
+renderIngresos();
+renderEgresos();
+</script>
+</body>
+</html>
